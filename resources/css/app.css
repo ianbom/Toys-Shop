@@ -1,0 +1,391 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&family=Patrick+Hand&display=swap');
+
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans: 'Nunito', 'Arial Rounded MT Bold', system-ui, sans-serif;
+    --font-serif: 'Nunito', 'Arial Rounded MT Bold', system-ui, sans-serif;
+    --font-hand: 'Patrick Hand', 'Comic Sans MS', cursive;
+
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    --shadow-subtle: 0 3px 10px rgba(6, 27, 91, 0.08);
+    --shadow-dropdown: 0 10px 28px rgba(6, 27, 91, 0.12);
+    --shadow-modal: 0 24px 60px rgba(6, 27, 91, 0.18);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-canvas: var(--canvas);
+    --color-ink: var(--ink);
+    --color-body: var(--body);
+    --color-muted-soft: var(--muted-soft);
+    --color-hairline: var(--hairline);
+    --color-hairline-strong: var(--hairline-strong);
+    --color-surface-soft: var(--surface-soft);
+    --color-surface-muted: var(--surface-muted);
+    --color-sale: var(--sale);
+    --color-promo: var(--promo);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-error: var(--error);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --canvas: #ffffff;
+    --ink: #061b5b;
+    --body: #26345e;
+    --muted-soft: #6f7691;
+    --hairline: #e5e7ef;
+    --hairline-strong: #cbd2e4;
+    --surface-soft: #fafafa;
+    --surface-muted: #f5f5f5;
+    --sale: #ff8a00;
+    --promo: #a9d8f6;
+    --success: #1fa463;
+    --warning: #f6a623;
+    --error: #d83a3a;
+
+    --background: #ffffff;
+    --foreground: #061b5b;
+    --card: #ffffff;
+    --card-foreground: #061b5b;
+    --popover: #ffffff;
+    --popover-foreground: #061b5b;
+    --primary: #1f7ae5;
+    --primary-foreground: #ffffff;
+    --secondary: #f5f5f5;
+    --secondary-foreground: #061b5b;
+    --muted: #f5f5f5;
+    --muted-foreground: #6f7691;
+    --accent: #ef2b2d;
+    --accent-foreground: #ffffff;
+    --destructive: #d83a3a;
+    --destructive-foreground: #ffffff;
+    --border: #e5e7ef;
+    --input: #cbd2e4;
+    --ring: #061b5b;
+    --chart-1: #061b5b;
+    --chart-2: #1f7ae5;
+    --chart-3: #65b946;
+    --chart-4: #ff8a00;
+    --chart-5: #ff7da8;
+    --radius: 16px;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #061b5b;
+    --sidebar-primary: #1f7ae5;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f5f5f5;
+    --sidebar-accent-foreground: #061b5b;
+    --sidebar-border: #e5e7ef;
+    --sidebar-ring: #061b5b;
+}
+
+.dark {
+    --canvas: #fcfdff;
+    --ink: #061b5b;
+    --body: #26345e;
+    --muted-soft: #6f7691;
+    --hairline: #e5e7ef;
+    --hairline-strong: #cbd2e4;
+    --surface-soft: #fafafa;
+    --surface-muted: #f5f5f5;
+    --background: #ffffff;
+    --foreground: #061b5b;
+    --card: #ffffff;
+    --card-foreground: #061b5b;
+    --popover: #ffffff;
+    --popover-foreground: #061b5b;
+    --primary: #1f7ae5;
+    --primary-foreground: #ffffff;
+    --secondary: #f5f5f5;
+    --secondary-foreground: #061b5b;
+    --muted: #f5f5f5;
+    --muted-foreground: #6f7691;
+    --accent: #ef2b2d;
+    --accent-foreground: #ffffff;
+    --destructive: #d83a3a;
+    --destructive-foreground: #ffffff;
+    --border: #e5e7ef;
+    --input: #cbd2e4;
+    --ring: #061b5b;
+    --chart-1: #061b5b;
+    --chart-2: #1f7ae5;
+    --chart-3: #65b946;
+    --chart-4: #ff8a00;
+    --chart-5: #ff7da8;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #061b5b;
+    --sidebar-primary: #1f7ae5;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f5f5f5;
+    --sidebar-accent-foreground: #061b5b;
+    --sidebar-border: #e5e7ef;
+    --sidebar-ring: #061b5b;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-background text-foreground antialiased;
+        font-variant-numeric: tabular-nums;
+        text-rendering: optimizeLegibility;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-sans font-extrabold text-foreground;
+        text-wrap: balance;
+    }
+
+    p,
+    li,
+    span {
+        text-wrap: pretty;
+    }
+
+    a,
+    button,
+    input,
+    select,
+    textarea {
+        @apply transition duration-200;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        @apply outline-2 outline-offset-2 outline-ring;
+    }
+
+    ::selection {
+        background: #061b5b;
+        color: #ffffff;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #cbd2e4;
+        border: 3px solid transparent;
+        background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #6f7691;
+        background-clip: content-box;
+    }
+}
+
+@layer components {
+    .toy-page-shell {
+        background:
+            radial-gradient(
+                circle at top left,
+                rgba(169, 216, 246, 0.24),
+                transparent 22%
+            ),
+            radial-gradient(
+                circle at top right,
+                rgba(255, 125, 168, 0.12),
+                transparent 16%
+            ),
+            linear-gradient(180deg, #ffffff 0%, #fffefc 100%);
+    }
+
+    .toy-logo-oval {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 240px;
+        min-height: 82px;
+        border-radius: 999px;
+        background: #ef2b2d;
+        color: #ffffff;
+        font-family: var(--font-hand);
+        font-size: clamp(2rem, 3vw, 2.7rem);
+        line-height: 1;
+        box-shadow: 0 12px 30px rgba(239, 43, 45, 0.16);
+    }
+
+    .toy-logo-oval::before,
+    .toy-logo-oval::after {
+        content: '';
+        position: absolute;
+        inset: 6px;
+        border: 2px solid rgba(255, 255, 255, 0.92);
+        border-radius: 999px;
+    }
+
+    .toy-logo-oval::after {
+        inset: 12px;
+        border-width: 1.5px;
+    }
+
+    .toy-pill-nav {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #061b5b;
+        border-radius: 999px;
+        padding-inline: 1.5rem;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #061b5b;
+        background: #ffffff;
+    }
+
+    .toy-toolbar-chip {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        gap: 0.75rem;
+        border: 1px solid #e5e7ef;
+        border-radius: 12px;
+        padding-inline: 1rem;
+        background: #f5f5f5;
+        color: #061b5b;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .toy-card {
+        border: 1px solid #e5e7ef;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 3px 10px rgba(6, 27, 91, 0.08);
+    }
+
+    .toy-card:hover {
+        box-shadow: 0 8px 24px rgba(6, 27, 91, 0.12);
+    }
+
+    .toy-btn-primary {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        padding-inline: 1.25rem;
+        background: #1f7ae5;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .toy-btn-primary:hover {
+        background: #175fbd;
+    }
+
+    .toy-btn-secondary {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #061b5b;
+        border-radius: 12px;
+        padding-inline: 1.25rem;
+        background: #ffffff;
+        color: #061b5b;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .toy-btn-secondary:hover {
+        background: #eef7ff;
+    }
+
+    .toy-handwritten {
+        font-family: var(--font-hand);
+        line-height: 1;
+    }
+
+    .toy-doodle-star::before,
+    .toy-doodle-swirl::before,
+    .toy-doodle-loop::before {
+        position: absolute;
+        pointer-events: none;
+        opacity: 0.9;
+    }
+
+    .toy-doodle-star::before {
+        content: '☆';
+        font-size: 2.25rem;
+        color: #ffc94a;
+    }
+
+    .toy-doodle-swirl::before {
+        content: '﹌';
+        font-size: 3rem;
+        color: #ff7da8;
+        rotate: 90deg;
+    }
+
+    .toy-doodle-loop::before {
+        content: '~';
+        font-size: 3rem;
+        color: #65b946;
+    }
+}

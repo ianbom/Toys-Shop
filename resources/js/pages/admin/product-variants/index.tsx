@@ -1,0 +1,613 @@
+import { Head, Link, router } from '@inertiajs/react';
+import {
+    Box,
+    ChevronLeft,
+    ChevronRight,
+    Edit,
+    LayoutGrid,
+    MoreVertical,
+    Package,
+    Plus,
+    Search,
+    SlidersHorizontal,
+    Trash2,
+    XCircle,
+    RotateCcw,
+} from 'lucide-react';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { PerPageSelect } from '../pagination';
+
+interface Variant {
+    id: number;
+    product_id: number;
+    product: string | null;
+    sku: string;
+    color_name: string | null;
+    color_hex: string | null;
+    size: string | null;
+    additional_price: string;
+    stock: number;
+    reserved_stock: number;
+    available_stock: number;
+    image_url: string | null;
+    is_active: boolean;
+    order_items_count: number;
+}
+
+interface PaginatedVariants {
+    data: Variant[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    links: { url: string | null; label: string; active: boolean }[];
+}
+
+interface Filters {
+    search?: string;
+    status?: string;
+}
+
+interface Props {
+    variants: PaginatedVariants;
+    product: { id: number; name: string } | null;
+    filters: Filters;
+    stats: {
+        total: number;
+        active: number;
+        inactive: number;
+        low_stock: number;
+    };
+}
+
+const fmt = (v: number | string) =>
+    new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0,
+    })
+        .format(Number(v))
+        .replace('Rp', 'Rp ');
+
+export default function ProductVariantsIndex({
+    variants,
+    product,
+    filters,
+    stats: totals,
+}: Props) {
+    const [search, setSearch] = useState(filters.search ?? '');
+
+    const indexUrl = product
+        ? `/admin/products/${product.id}/variants`
+        : '/admin/product-variants';
+
+    const applyFilter = (key: string, value: string) =>
+        router.get(
+            indexUrl,
+            { ...filters, [key]: value, page: 1 },
+            { preserveState: true, replace: true },
+        );
+
+    const resetFilters = () =>
+        router.get(indexUrl, {}, { preserveState: false });
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        applyFilter('search', search);
+    };
+
+    const doAction = (url: string, method: 'post' | 'delete' = 'post') =>
+        router[method](url, {}, { preserveScroll: true });
+
+    const stats = [
+        {
+            title: 'Total Variants',
+            val: totals.total,
+            sub: 'registered',
+            icon: Package,
+            iconBg: 'bg-white/20',
+            iconColor: 'text-white',
+            cardBg: 'bg-gradient-to-br from-[#151515] to-[#2a1c17] text-white',
+            valColor: 'text-white',
+            titleColor: 'text-white/90',
+            subColor: 'text-white/60',
+            featured: true,
+        },
+        {
+            title: 'Active',
+            val: totals.active,
+            sub: 'variants active',
+            icon: Box,
+            iconBg: 'bg-emerald-100',
+            iconColor: 'text-emerald-600',
+            cardBg: 'bg-white',
+            valColor: 'text-zinc-900',
+            titleColor: 'text-zinc-600',
+            subColor: 'text-zinc-400',
+            accent: 'from-emerald-400 to-emerald-500',
+        },
+        {
+            title: 'Inactive',
+            val: totals.inactive,
+            sub: 'variants inactive',
+            icon: XCircle,
+            iconBg: 'bg-zinc-100',
+            iconColor: 'text-zinc-600',
+            cardBg: 'bg-white',
+            valColor: 'text-zinc-900',
+            titleColor: 'text-zinc-600',
+            subColor: 'text-zinc-400',
+            accent: 'from-zinc-400 to-zinc-500',
+        },
+        {
+            title: 'Low Stock',
+            val: totals.low_stock,
+            sub: '= 5 items available',
+            icon: SlidersHorizontal,
+            iconBg: 'bg-rose-100',
+            iconColor: 'text-rose-600',
+            cardBg: 'bg-white',
+            valColor: 'text-zinc-900',
+            titleColor: 'text-zinc-600',
+            subColor: 'text-zinc-400',
+            accent: 'from-rose-400 to-rose-500',
+        },
+    ];
+
+    return (
+        <>
+            <Head
+                title={
+                    product ? `${product.name} Variants` : 'Product Variants'
+                }
+            />
+
+            <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+                {/* Header */}
+                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+                    <div>
+                        <p className="mb-1 text-[11px] font-bold tracking-widest text-[#151515]/50 uppercase">
+                            Catalog Management
+                        </p>
+                        <h1 className="font-serif text-3xl leading-tight text-zinc-900">
+                            {product
+                                ? `${product.name} Variants`
+                                : 'Product Variants'}
+                        </h1>
+                        <p className="mt-1 text-sm text-zinc-400">
+                            Manage variant SKUs, colors, sizes, and stock
+                            availability.
+                        </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                        <Link
+                            href={`/admin/product-variants/create${product ? `?product_id=${product.id}` : ''}`}
+                        >
+                            <Button
+                                size="sm"
+                                className="h-9 gap-1.5 bg-[#B98B63] text-white shadow-sm hover:bg-[#9A6B45]"
+                            >
+                                <Plus className="h-3.5 w-3.5" /> Add Variant
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Stat Cards */}
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {stats.map((m, i) => (
+                        <div
+                            key={i}
+                            className={[
+                                'relative overflow-hidden rounded-2xl border transition-all duration-200 hover:-translate-y-0.5',
+                                m.featured
+                                    ? 'border-transparent shadow-lg shadow-[#151515]/20'
+                                    : 'border-zinc-100 shadow-sm hover:shadow-md',
+                                m.cardBg,
+                            ].join(' ')}
+                        >
+                            {!m.featured && m.accent && (
+                                <div
+                                    className={
+                                        'absolute top-0 right-0 left-0 h-0.5 bg-gradient-to-r ' +
+                                        m.accent
+                                    }
+                                />
+                            )}
+                            {m.featured && (
+                                <div className="absolute -top-5 -right-5 h-20 w-20 rounded-full bg-white/10" />
+                            )}
+
+                            <div className="flex flex-col gap-3 p-4">
+                                <div className="flex items-center justify-between">
+                                    <div
+                                        className={
+                                            'flex h-8 w-8 items-center justify-center rounded-xl ' +
+                                            m.iconBg
+                                        }
+                                    >
+                                        <m.icon
+                                            className={'h-4 w-4 ' + m.iconColor}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <div
+                                        className={
+                                            'text-2xl leading-none font-bold tracking-tight ' +
+                                            m.valColor
+                                        }
+                                    >
+                                        {m.val}
+                                    </div>
+                                    <div
+                                        className={
+                                            'mt-1.5 text-[11px] font-semibold ' +
+                                            m.titleColor
+                                        }
+                                    >
+                                        {m.title}
+                                    </div>
+                                    <div
+                                        className={
+                                            'mt-0.5 text-[10px] ' + m.subColor
+                                        }
+                                    >
+                                        {m.sub}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Main Table Card */}
+                <div className="overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm">
+                    {/* Filter Bar */}
+                    <form
+                        onSubmit={handleSearch}
+                        className="flex flex-wrap items-end gap-3 border-b border-zinc-100 bg-zinc-50/40 px-5 py-4"
+                    >
+                        <div className="relative min-w-[200px] flex-1">
+                            <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+                            <Input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search SKU, product..."
+                                className="h-9 rounded-lg border-zinc-200 bg-white pl-9 text-sm shadow-sm"
+                            />
+                        </div>
+
+                        <FilterSelect
+                            label="Status"
+                            value={filters.status || 'all'}
+                            onChange={(v) =>
+                                applyFilter('status', v === 'all' ? '' : v)
+                            }
+                        >
+                            <SelectItem value="all">All Status</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                        </FilterSelect>
+
+                        <div className="ml-auto flex gap-2">
+                            <Button
+                                type="submit"
+                                size="sm"
+                                className="h-9 gap-1.5 bg-[#B98B63] text-white hover:bg-[#9A6B45]"
+                            >
+                                <Search className="h-3.5 w-3.5" /> Search
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 gap-1.5 text-zinc-500 hover:text-zinc-700"
+                                onClick={resetFilters}
+                            >
+                                <RotateCcw className="h-3.5 w-3.5" /> Reset
+                            </Button>
+                        </div>
+                    </form>
+
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                            <thead className="border-b border-zinc-100 bg-zinc-50/50 text-xs text-zinc-500">
+                                <tr>
+                                    <th className="px-5 py-3 font-medium">
+                                        No
+                                    </th>
+                                    <th className="px-5 py-3 font-medium">
+                                        Variant Info
+                                    </th>
+                                    <th className="px-5 py-3 font-medium">
+                                        Color / Size
+                                    </th>
+                                    <th className="px-5 py-3 font-medium">
+                                        Pricing Add.
+                                    </th>
+                                    <th className="px-5 py-3 font-medium">
+                                        Stock Summary
+                                    </th>
+                                    <th className="px-5 py-3 font-medium">
+                                        Status
+                                    </th>
+                                    <th className="px-5 py-3 text-right font-medium">
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-100">
+                                {variants.data.length === 0 && (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-5 py-8 text-center text-zinc-500"
+                                        >
+                                            <div className="flex flex-col items-center justify-center gap-2">
+                                                <Package className="h-8 w-8 text-zinc-300" />
+                                                <p>No variants found.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {variants.data.map((v, index) => {
+                                    return (
+                                        <tr
+                                            key={v.id}
+                                            className="group transition-colors hover:bg-zinc-50/50"
+                                        >
+                                            <td className="px-5 py-3 text-xs font-medium text-zinc-400">
+                                                {(variants.from ?? 1) + index}
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    {v.image_url ? (
+                                                        <img
+                                                            src={v.image_url}
+                                                            alt={v.sku}
+                                                            className="h-10 w-10 rounded-lg border border-zinc-200 object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-100">
+                                                            <LayoutGrid className="h-4 w-4 text-zinc-400" />
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="font-medium text-zinc-900">
+                                                            {v.sku}
+                                                        </p>
+                                                        <p
+                                                            className="max-w-[150px] truncate text-xs text-zinc-500"
+                                                            title={
+                                                                v.product || ''
+                                                            }
+                                                        >
+                                                            {v.product || '-'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-2">
+                                                        {v.color_hex && (
+                                                            <span
+                                                                className="h-3 w-3 rounded-full border border-zinc-200"
+                                                                style={{
+                                                                    backgroundColor:
+                                                                        v.color_hex,
+                                                                }}
+                                                            />
+                                                        )}
+                                                        <span className="text-zinc-700">
+                                                            {v.color_name ||
+                                                                '-'}
+                                                        </span>
+                                                    </div>
+                                                    <span className="w-fit rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-xs text-zinc-500">
+                                                        {v.size || '-'}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <span className="font-medium text-zinc-900">
+                                                    {fmt(v.additional_price)}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="font-medium text-zinc-900">
+                                                        {v.available_stock}{' '}
+                                                        <span className="text-xs font-normal text-zinc-500">
+                                                            available
+                                                        </span>
+                                                    </span>
+                                                    <span className="text-[10px] text-zinc-400">
+                                                        {v.reserved_stock}{' '}
+                                                        reserved / {v.stock}{' '}
+                                                        total
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <Badge
+                                                    variant="secondary"
+                                                    className={
+                                                        v.is_active
+                                                            ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
+                                                            : 'border-zinc-200 bg-zinc-100 text-zinc-600'
+                                                    }
+                                                >
+                                                    {v.is_active
+                                                        ? 'Active'
+                                                        : 'Inactive'}
+                                                </Badge>
+                                            </td>
+                                            <td className="px-5 py-3 text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-zinc-400 hover:text-zinc-600"
+                                                        >
+                                                            <MoreVertical className="h-4 w-4" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent
+                                                        align="end"
+                                                        className="w-40"
+                                                    >
+                                                        <DropdownMenuItem
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={`/admin/product-variants/${v.id}/stock-adjustment`}
+                                                                className="flex w-full items-center gap-2"
+                                                            >
+                                                                <SlidersHorizontal className="h-3.5 w-3.5" />{' '}
+                                                                Adjust Stock
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            asChild
+                                                        >
+                                                            <Link
+                                                                href={`/admin/product-variants/${v.id}/edit`}
+                                                                className="flex w-full items-center gap-2"
+                                                            >
+                                                                <Edit className="h-3.5 w-3.5" />{' '}
+                                                                Edit Variant
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() => {
+                                                                if (
+                                                                    confirm(
+                                                                        `Delete variant ${v.sku}?`,
+                                                                    )
+                                                                ) {
+                                                                    doAction(
+                                                                        `/admin/product-variants/${v.id}`,
+                                                                        'delete',
+                                                                    );
+                                                                }
+                                                            }}
+                                                            className="gap-2 text-red-600 focus:bg-red-50 focus:text-red-600"
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />{' '}
+                                                            Delete
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/40 px-5 py-3.5">
+                        <span className="text-xs text-zinc-400">
+                            {variants.from && variants.to
+                                ? `Showing ${variants.from}-${variants.to} of ${variants.total} variants`
+                                : 'No variants'}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            {variants.links.map((link, i) => {
+                                const isChevronLeft =
+                                    link.label.includes('Previous') ||
+                                    link.label.includes('&laquo;');
+                                const isChevronRight =
+                                    link.label.includes('Next') ||
+                                    link.label.includes('&raquo;');
+                                const label = isChevronLeft ? (
+                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                ) : isChevronRight ? (
+                                    <ChevronRight className="h-3.5 w-3.5" />
+                                ) : (
+                                    <span
+                                        dangerouslySetInnerHTML={{
+                                            __html: link.label,
+                                        }}
+                                    />
+                                );
+
+                                return (
+                                    <button
+                                        key={i}
+                                        disabled={!link.url}
+                                        onClick={() =>
+                                            link.url && router.get(link.url)
+                                        }
+                                        className={[
+                                            'flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-xs font-medium transition-colors',
+                                            link.active
+                                                ? 'bg-[#B98B63] text-white shadow-sm'
+                                                : !link.url
+                                                  ? 'cursor-not-allowed text-zinc-300'
+                                                  : 'text-zinc-500 hover:bg-zinc-100',
+                                        ].join(' ')}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                            <PerPageSelect paginator={variants} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+}
+
+function FilterSelect({
+    label,
+    value,
+    onChange,
+    children,
+}: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="flex flex-col gap-1">
+            <span className="px-0.5 text-[10px] font-semibold tracking-wider text-zinc-400 uppercase">
+                {label}
+            </span>
+            <Select value={value} onValueChange={onChange}>
+                <SelectTrigger className="h-9 w-[130px] rounded-lg border-zinc-200 bg-white text-xs shadow-sm">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>{children}</SelectContent>
+            </Select>
+        </div>
+    );
+}

@@ -1,0 +1,85 @@
+<h2>Pick the redesign approach</h2>
+<p class="subtitle">Based on your answers so far, A is the recommended plan direction.</p>
+<div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#f7fbff;">
+      <div class="mockup">
+        <div class="mockup-header">A. Full toy reskin + shared storefront theme</div>
+        <div class="mockup-body" style="background:#fff;display:grid;gap:10px;">
+          <div style="height:28px;background:#a9d8f6;border-radius:999px;"></div>
+          <div style="display:grid;grid-template-columns:1.2fr 1fr 1.1fr;gap:10px;align-items:center;">
+            <div style="height:52px;border:1px solid #cbd2e4;border-radius:999px;background:#fff;"></div>
+            <div style="height:58px;border-radius:999px;background:#ef2b2d;"></div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+              <div style="width:42px;height:42px;border:2px solid #061b5b;border-radius:999px;"></div>
+              <div style="width:42px;height:42px;border:2px solid #061b5b;border-radius:999px;"></div>
+              <div style="width:42px;height:42px;border:2px solid #061b5b;border-radius:999px;"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;overflow:hidden;">
+            <div style="flex:1;height:38px;border:1.5px solid #061b5b;border-radius:999px;background:#fff;"></div>
+            <div style="flex:1;height:38px;border:1.5px solid #061b5b;border-radius:999px;background:#fff;"></div>
+            <div style="flex:1;height:38px;border:1.5px solid #061b5b;border-radius:999px;background:#fff;"></div>
+          </div>
+          <div style="height:30px;background:#061b5b;border-radius:999px;"></div>
+          <div style="height:22px;width:62%;margin:0 auto;background:#061b5b;border-radius:999px;"></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div style="height:168px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;box-shadow:0 3px 10px rgba(6,27,91,.08);"></div>
+            <div style="height:168px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;box-shadow:0 3px 10px rgba(6,27,91,.08);"></div>
+            <div style="height:168px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;box-shadow:0 3px 10px rgba(6,27,91,.08);"></div>
+            <div style="height:168px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;box-shadow:0 3px 10px rgba(6,27,91,.08);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Recommended</h3>
+      <p>Replace current sporty storefront language with playful toy-store system across shared shop surfaces and product list.</p>
+    </div>
+  </div>
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#fafafa;">
+      <div class="mockup">
+        <div class="mockup-header">B. Storefront scoped reskin</div>
+        <div class="mockup-body" style="background:#fff;display:grid;gap:10px;">
+          <div style="height:28px;background:#a9d8f6;border-radius:999px;"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="height:54px;border:1px solid #cbd2e4;border-radius:999px;background:#fff;"></div>
+            <div style="height:54px;border:1px solid #cbd2e4;border-radius:999px;background:#fff;"></div>
+          </div>
+          <div style="height:30px;background:#061b5b;border-radius:999px;"></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div style="height:190px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+            <div style="height:190px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+            <div style="height:190px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+            <div style="height:190px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Safer blast radius</h3>
+      <p>Same toy visual system, but tokens/classes stay under shop-specific wrappers so admin and other pages remain untouched.</p>
+    </div>
+  </div>
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:20px;background:#f6f6f6;">
+      <div class="mockup">
+        <div class="mockup-header">C. Listing-only makeover</div>
+        <div class="mockup-body" style="background:#fff;display:grid;gap:10px;">
+          <div style="height:34px;width:75%;margin:0 auto;background:#061b5b;border-radius:999px;"></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            <div style="height:220px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+            <div style="height:220px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+            <div style="height:220px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+            <div style="height:220px;border:1px solid #e5e7ef;border-radius:16px;background:#fff;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Fastest</h3>
+      <p>Main grid and toolbar match the screenshot, but surrounding header/footer rhythm remains visibly inconsistent with the reference.</p>
+    </div>
+  </div>
+</div>

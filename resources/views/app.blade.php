@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        {{-- Inline style to keep app in light mode before hydration --}}
+        <style>
+            html {
+                background-color: oklch(1 0 0);
+                color-scheme: light;
+            }
+        </style>
+
+        <link rel="icon" href="/logo-shay/axegear-logo.webp" type="image/png">
+        <link rel="apple-touch-icon" href="/logo-shay/axegear-logo.webp">
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=jost:400,500,600|fraunces:300,400" rel="stylesheet" />
+
+        @viteReactRefresh
+        @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        <x-inertia::head>
+            <title>{{ config('app.name', 'Laravel') }}</title>
+        </x-inertia::head>
+    </head>
+    <body class="font-sans antialiased">
+        <x-inertia::app />
+    </body>
+</html>
