@@ -1,26 +1,14 @@
 import { Head, Link } from '@inertiajs/react';
 import {
-    Bike,
-    Car,
+    ArrowRight,
     ChevronRight,
-    Clock3,
-    Dumbbell,
-    Eye,
-    Facebook,
-    Flame,
-    Gauge,
-    Goal,
-    Instagram,
-    Mail,
-    Medal,
-    Mountain,
+    Heart,
     Shield,
-    Snowflake,
-    Waves,
-    Youtube,
+    Sparkles,
+    Star,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import type { ComponentType, ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import ShopLayout from '@/layouts/shop-layout';
 import { detail, list } from '@/routes';
@@ -31,6 +19,7 @@ type ProductCard = {
     name: string;
     price: number;
     sale_price: number | null;
+    badge?: string | null;
     label: string | null;
     image: string | null;
     category: string | null;
@@ -68,612 +57,848 @@ type Props = {
     mostLoved: ProductCard[];
 };
 
-type IconType = ComponentType<{
-    className?: string;
-    size?: number;
-    strokeWidth?: number;
-}>;
+type CategoryFeature = {
+    title: string;
+    description: string;
+    image: string;
+    href: string;
+};
 
-const productImages = [
-    'https://www.100percent.com/cdn/shop/files/59057-00001-P_1.jpg?v=1764788225&width=1100',
-    'https://www.100percent.com/cdn/shop/files/SP26_SPEEDCRAFT_SL_60008-00025_3Q.jpg?v=1772487312&width=500',
-    'https://www.100percent.com/cdn/shop/files/2000x2000-eComm_20PDP-Casual_Staple_20Tee_0010_Layer_2015.jpg?v=1764633157&width=1200',
-    'https://www.100percent.com/cdn/shop/files/2000x2000-eComm_20PDP-Casual_Region_20Tee_0001_Layer_2030.jpg?v=1764633177&width=1200',
-    'https://www.100percent.com/cdn/shop/files/FA25_LS_OS_TEE_REGION__2020142-10002_F-002.jpg?v=1764633155&width=1100',
-    'https://www.100percent.com/cdn/shop/files/59057-00001-P_1.jpg?v=1764788225&width=900',
+type AgeCard = {
+    title: string;
+    image: string;
+    tint: string;
+};
+
+type GiftCard = {
+    title: string;
+    body: string;
+    image: string;
+    href: string;
+};
+
+const fallbackProductImages = [
+    '/img/abdul-raheem-kannath-aNWfK46QWto-unsplash.webp',
+    '/img/ainur-iman-qcNmigFPTQM-unsplash.webp',
+    '/img/atiyeh-fathi-CvdzGjVX9DA-unsplash.webp',
+    '/img/hasan-almasi-_X2UAmIcpko-unsplash.webp',
+    '/img/ike-ellyana-2F70bGqQVa4-unsplash.webp',
 ];
 
-const campaignImages = {
-    hero: 'https://images.unsplash.com/photo-1629223476921-49a9ba5c26e4?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    goggle: 'https://plus.unsplash.com/premium_photo-1661963005592-182d602c6a3f?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    moto: 'https://images.unsplash.com/photo-1558980664-10e7170b5df9?q=80&w=1100&auto=format&fit=crop',
-    cycling:
-        'https://plus.unsplash.com/premium_photo-1661963826911-f369fa24c1a6?q=80&w=1306&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    trail: 'https://plus.unsplash.com/premium_photo-1661962729688-ee99b8528b78?q=80&w=1306&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    race: 'https://plus.unsplash.com/premium_photo-1661963253228-5058700024ea?q=80&w=1243&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    weather:
-        'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1100&auto=format&fit=crop',
+const toyPhotography = {
+    hero: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1400&auto=format&fit=crop',
+    promo: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=1200&auto=format&fit=crop',
+    categoryBaby:
+        'https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?q=80&w=800&auto=format&fit=crop',
+    categoryPretend:
+        'https://images.unsplash.com/photo-1545558014-8692077e9b5c?q=80&w=800&auto=format&fit=crop',
+    categoryLearning:
+        'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800&auto=format&fit=crop',
+    categoryPuzzle:
+        'https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=800&auto=format&fit=crop',
+    categoryCraft:
+        'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=800&auto=format&fit=crop',
+    categoryOutdoor:
+        'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=800&auto=format&fit=crop',
+    ageBaby:
+        'https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?q=80&w=900&auto=format&fit=crop',
+    ageOne: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=900&auto=format&fit=crop',
+    ageTwo: 'https://images.unsplash.com/photo-1519340333755-c1aa5571fd46?q=80&w=900&auto=format&fit=crop',
+    ageThree:
+        'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=900&auto=format&fit=crop',
+    ageSix: 'https://images.unsplash.com/photo-1503919545889-aef636e10ad4?q=80&w=900&auto=format&fit=crop',
+    giftAge:
+        'https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?q=80&w=1200&auto=format&fit=crop',
+    giftInterest:
+        'https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=1200&auto=format&fit=crop',
+    giftBudget:
+        'https://images.unsplash.com/photo-1481391032119-d89fee407e44?q=80&w=1200&auto=format&fit=crop',
 };
+
+const ageCards: AgeCard[] = [
+    {
+        title: '0–12 Months',
+        image: toyPhotography.ageBaby,
+        tint: 'from-[#D6ECFF] to-[#B8DDFD]',
+    },
+    {
+        title: '1–2 Years',
+        image: toyPhotography.ageOne,
+        tint: 'from-[#E7F5DA] to-[#D5EEBE]',
+    },
+    {
+        title: '2–3 Years',
+        image: toyPhotography.ageTwo,
+        tint: 'from-[#FFF1CC] to-[#FFE3A6]',
+    },
+    {
+        title: '3–5 Years',
+        image: toyPhotography.ageThree,
+        tint: 'from-[#FFE2E8] to-[#FFD0DB]',
+    },
+    {
+        title: '6–8 Years',
+        image: toyPhotography.ageSix,
+        tint: 'from-[#E9DEFF] to-[#DCC8FF]',
+    },
+];
+
+const playFeatures = [
+    {
+        title: 'Imaginative play',
+        body: 'Encourages creativity and open-ended imagination.',
+        icon: Sparkles,
+    },
+    {
+        title: 'Skill building',
+        body: 'Supports early learning across key developmental skills.',
+        icon: Star,
+    },
+    {
+        title: 'Child-safe materials',
+        body: 'High-quality, non-toxic materials you can trust.',
+        icon: Shield,
+    },
+    {
+        title: 'Parent-approved design',
+        body: 'Loved by kids and recommended by parents.',
+        icon: Heart,
+    },
+];
+
+const giftCards: GiftCard[] = [
+    {
+        title: 'Gifts by Age',
+        body: 'Toys for every stage of growth.',
+        image: toyPhotography.giftAge,
+        href: list.url(),
+    },
+    {
+        title: 'Gifts by Interest',
+        body: 'From animals to art and more.',
+        image: toyPhotography.giftInterest,
+        href: list.url(),
+    },
+    {
+        title: 'Gifts Under $50',
+        body: 'Great toys, joyful prices.',
+        image: toyPhotography.giftBudget,
+        href: list.url(),
+    },
+];
+
+const testimonials = [
+    {
+        quote: 'The toys are beautiful, safe, and our kids absolutely love them. Fast shipping too.',
+        name: 'Jessica M.',
+    },
+    {
+        quote: 'We love the educational toys that actually keep our toddler engaged. Amazing quality.',
+        name: 'David R.',
+    },
+    {
+        quote: 'Beautifully made toys that grow with our child. Our go-to place for gifts.',
+        name: 'Sarah T.',
+    },
+];
 
 const fallbackProducts: ProductCard[] = [
     {
         id: 901,
-        slug: 'axeview-pro-speedcraft',
-        name: 'AXEVIEW PRO SPEEDCRAFT',
-        price: 2899000,
-        sale_price: 2319000,
-        label: 'SALE',
-        image: productImages[0],
-        category: 'Sunglasses',
-        collection: 'Race Vision',
+        slug: 'ocean-adventure-play-gym',
+        name: 'Ocean Adventure Play Gym',
+        price: 959840,
+        sale_price: null,
+        badge: 'BEST SELLER',
+        label: 'BEST SELLER',
+        image: 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=1200&auto=format&fit=crop',
+        category: 'Baby Toys',
+        collection: 'Best Sellers',
         colors: [],
     },
     {
         id: 902,
-        slug: 'racevision-mx-goggle',
-        name: 'RACEVISION MX GOGGLE',
-        price: 2199000,
+        slug: 'abc-learning-blocks',
+        name: 'ABC & 123 Learning Blocks',
+        price: 479840,
         sale_price: null,
+        badge: 'NEW',
         label: 'NEW',
-        image: productImages[1],
-        category: 'Goggles',
-        collection: 'Moto',
+        image: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=1200&auto=format&fit=crop',
+        category: 'Learning Toys',
+        collection: 'New Arrivals',
         colors: [],
     },
     {
         id: 903,
-        slug: 'staple-performance-tee',
-        name: 'STAPLE PERFORMANCE TEE',
-        price: 699000,
+        slug: 'berry-buddy-take-along-toy',
+        name: 'Berry Buddy Take-Along Toy',
+        price: 239840,
         sale_price: null,
-        label: null,
-        image: productImages[2],
-        category: 'Apparel',
-        collection: 'Casual',
+        badge: 'BEST SELLER',
+        label: 'BEST SELLER',
+        image: 'https://images.unsplash.com/photo-1563901935883-cb291c7af1de?q=80&w=1200&auto=format&fit=crop',
+        category: 'Travel Toys',
+        collection: 'Best Sellers',
         colors: [],
     },
     {
         id: 904,
-        slug: 'region-casual-tee',
-        name: 'REGION CASUAL TEE',
-        price: 749000,
-        sale_price: 599000,
-        label: 'SALE',
-        image: productImages[3],
-        category: 'Apparel',
-        collection: 'Lifestyle',
-        colors: [],
-    },
-    {
-        id: 905,
-        slug: 'region-long-sleeve-tee',
-        name: 'REGION LONG SLEEVE TEE',
-        price: 899000,
+        slug: 'sort-stack-shape-puzzle',
+        name: 'Sort & Stack Shape Puzzle',
+        price: 319840,
         sale_price: null,
+        badge: 'NEW',
         label: 'NEW',
-        image: productImages[4],
-        category: 'Apparel',
-        collection: 'Weather Ready',
+        image: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=1200&auto=format&fit=crop',
+        category: 'Puzzles',
+        collection: 'New Arrivals',
         colors: [],
-    },
-    {
-        id: 906,
-        slug: 'axegear-lens-kit-x1',
-        name: 'AXEGEAR LENS KIT X1',
-        price: 1299000,
-        sale_price: 999000,
-        label: 'SALE',
-        image: productImages[5],
-        category: 'Lens Kit',
-        collection: 'Essentials',
-        colors: [],
-    },
-];
-
-const categoryShortcuts: Array<{
-    label: string;
-    icon: IconType;
-    href: string;
-}> = [
-    {
-        label: 'Sunglasses',
-        icon: Eye,
-        href: `${list.url()}?category=sunglasses`,
-    },
-    {
-        label: 'Moto/MTB Goggles',
-        icon: Mountain,
-        href: `${list.url()}?category=goggles`,
-    },
-    { label: 'Gloves', icon: Shield, href: `${list.url()}?category=gloves` },
-    {
-        label: 'Snow Goggles',
-        icon: Snowflake,
-        href: `${list.url()}?category=snow-goggles`,
-    },
-    { label: 'Casual', icon: Dumbbell, href: `${list.url()}?category=apparel` },
-];
-
-const sportCards: Array<{ name: string; image: string; icon: IconType }> = [
-    { name: 'Moto', image: campaignImages.moto, icon: Flame },
-    {
-        name: 'MTB',
-        image: 'https://images.unsplash.com/photo-1593764592116-bfb2a97c642a?q=80&w=900&auto=format&fit=crop',
-        icon: Mountain,
-    },
-    { name: 'Snow', image: campaignImages.weather, icon: Snowflake },
-    {
-        name: 'Baseball',
-        image: 'https://images.unsplash.com/photo-1508344928928-7165b67de128?q=80&w=900&auto=format&fit=crop',
-        icon: Goal,
-    },
-    { name: 'Cycling', image: campaignImages.cycling, icon: Bike },
-    {
-        name: 'Running',
-        image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=900&auto=format&fit=crop',
-        icon: Gauge,
-    },
-    {
-        name: 'Outdoor',
-        image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=900&auto=format&fit=crop',
-        icon: Mountain,
-    },
-    {
-        name: 'Watersports',
-        image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=900&auto=format&fit=crop',
-        icon: Waves,
-    },
-    {
-        name: 'Motorsports',
-        image: 'https://images.unsplash.com/photo-1541447271487-09612b3f49f7?q=80&w=900&auto=format&fit=crop',
-        icon: Car,
-    },
-    {
-        name: 'ATV/UTV',
-        image: 'https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=900&auto=format&fit=crop',
-        icon: Gauge,
-    },
-];
-
-const featuredCollections = [
-    { title: 'Cycling Collection', image: campaignImages.cycling },
-    { title: 'Trail Performance', image: campaignImages.trail },
-    { title: 'Race Day Essentials', image: campaignImages.race },
-    { title: 'Weather Ready Gear', image: campaignImages.weather },
-];
-
-const benefits: Array<{ title: string; body: string; icon: IconType }> = [
-    {
-        title: 'Ultra-light performance',
-        body: 'Built for long sessions at race pace.',
-        icon: Gauge,
-    },
-    {
-        title: 'Impact protection',
-        body: 'Tough lens and frame systems for hard use.',
-        icon: Shield,
-    },
-    {
-        title: 'Athlete-tested design',
-        body: 'Fit, ventilation, and clarity proven outside.',
-        icon: Medal,
-    },
-    {
-        title: 'Fast shipping',
-        body: 'Packed fast so your gear is ready sooner.',
-        icon: Clock3,
     },
 ];
 
 const formatPrice = (value: number) =>
-    new Intl.NumberFormat('id-ID', {
+    new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'IDR',
-        maximumFractionDigits: 0,
-    }).format(value);
+        currency: 'USD',
+        minimumFractionDigits: 2,
+    }).format(Math.max(1, value / 16000));
 
-const productImage = (product: ProductCard, index: number) =>
-    product.image ?? productImages[index % productImages.length];
+const ratingForProduct = (product: ProductCard) => {
+    const value = 4.6 + ((product.id % 4) * 0.1 + (product.id % 3) * 0.03);
+    const rounded = Math.min(5, Math.round(value * 10) / 10);
+    const reviews = 180 + (product.id % 290);
 
-export default function Home({ recentAdditions }: Props) {
-    const newArrivals = [...recentAdditions, ...fallbackProducts].slice(0, 6);
+    return {
+        score: rounded.toFixed(1),
+        reviews,
+    };
+};
+
+const badgeLabel = (product: ProductCard) => {
+    const raw = product.badge ?? product.label;
+
+    if (raw) {
+        if (raw === 'DISCOUNT') {
+            return 'Sale';
+        }
+
+        return raw
+            .replace(/_/g, ' ')
+            .toLowerCase()
+            .replace(/(^|\s)\S/g, (value) => value.toUpperCase());
+    }
+
+    return product.id % 2 === 0 ? 'New' : 'Best Seller';
+};
+
+const fallbackCategoryCards: CategoryFeature[] = [
+    {
+        title: 'Baby Toys',
+        description: 'Safe, gentle and made for little discoveries.',
+        image: toyPhotography.categoryBaby,
+        href: list.url(),
+    },
+    {
+        title: 'Pretend Play',
+        description: 'Spark imagination with role play favorites.',
+        image: toyPhotography.categoryPretend,
+        href: list.url(),
+    },
+    {
+        title: 'Learning Toys',
+        description: 'Build skills through fun, hands-on play.',
+        image: toyPhotography.categoryLearning,
+        href: list.url(),
+    },
+    {
+        title: 'Puzzles',
+        description: 'Brain-boosting puzzles for every curious mind.',
+        image: toyPhotography.categoryPuzzle,
+        href: list.url(),
+    },
+    {
+        title: 'Arts & Crafts',
+        description: 'Create, color and craft endless masterpieces.',
+        image: toyPhotography.categoryCraft,
+        href: list.url(),
+    },
+    {
+        title: 'Outdoor Fun',
+        description: 'Active play for bright smiles outside.',
+        image: toyPhotography.categoryOutdoor,
+        href: list.url(),
+    },
+];
+
+function productImage(product: ProductCard, index: number) {
+    return (
+        product.image ??
+        fallbackProductImages[index % fallbackProductImages.length]
+    );
+}
+
+export default function Home({
+    categories,
+    recentAdditions,
+    mostLoved,
+}: Props) {
+    const bestSellerProducts = useMemo(() => {
+        const merged = [...mostLoved, ...recentAdditions, ...fallbackProducts];
+        const seen = new Set<number>();
+
+        return merged
+            .filter((product) => {
+                if (seen.has(product.id)) {
+                    return false;
+                }
+
+                seen.add(product.id);
+
+                return true;
+            })
+            .slice(0, 4);
+    }, [mostLoved, recentAdditions]);
+
+    const categoryCards = useMemo(() => {
+        const mapped = categories.slice(0, 6).map((category, index) => ({
+            title: category.name,
+            description:
+                fallbackCategoryCards[index]?.description ??
+                'Playful picks for curious little minds.',
+            image:
+                category.image_url ??
+                fallbackCategoryCards[index]?.image ??
+                fallbackCategoryCards[0].image,
+            href: list.url({ query: { category: category.slug } }),
+        }));
+
+        return [...mapped, ...fallbackCategoryCards].slice(0, 6);
+    }, [categories]);
 
     return (
         <ShopLayout>
-            <Head title="AxeGear - Performance Eyewear & Sport Gear" />
+            <Head title="Little Toy Toys - Play, Learn, and Grow Every Day" />
 
-            <div className="bg-[#1A1A1A] px-4 py-2 text-center text-[11px] font-extrabold tracking-[0.08em] text-white uppercase md:text-xs">
-                Mid Season Sale: Up to 20% Off Performance Eyewear{' '}
-                <Link
-                    href={list.url()}
-                    className="text-[#F58220] underline-offset-4 hover:underline"
-                >
-                    Shop Now
-                </Link>
-            </div>
+            <section className="relative mx-auto max-w-[1440px] px-4 pt-6 pb-16 sm:px-6 lg:px-8 lg:pt-8 lg:pb-20">
+                <div className="toy-doodle-star absolute top-18 left-2 hidden h-10 w-10 lg:block" />
+                <div className="toy-doodle-loop absolute top-[38rem] left-0 hidden h-10 w-10 lg:block" />
+                <div className="toy-doodle-swirl absolute top-24 right-0 hidden h-10 w-10 lg:block" />
+                <div className="toy-doodle-star absolute top-[68rem] right-10 hidden h-10 w-10 xl:block" />
 
-            <HeroSection />
-            <CategoryStrip />
-            <ShopBySport />
-            <CampaignBand />
-            <NewArrivals products={newArrivals} />
-            <FeaturedCollections />
-            <BenefitStrip />
+                <HeroSection />
+                <CategoryFeatureRow cards={categoryCards} />
+                <AgeExplorer />
+                <BestSellersSection products={bestSellerProducts} />
+                <MeaningfulPlaySection />
+                <NewArrivalsPromo />
+                <GiftGuideSection />
+                <TestimonialsSection />
+                {/* <PlaytimeNewsletter /> */}
+            </section>
         </ShopLayout>
     );
 }
 
 function HeroSection() {
     return (
-        <section className="relative overflow-hidden border-b border-[#1A1A1A] bg-white">
-            <div className="mx-auto grid min-h-[610px] max-w-[1600px] grid-cols-1 lg:grid-cols-[0.92fr_1.08fr]">
-                <FadeInOnScroll className="relative z-10 flex flex-col justify-center px-5 py-14 sm:px-8 lg:px-12 xl:px-16">
-                    <div className="mb-6 flex items-center gap-3 text-[12px] font-extrabold tracking-[0.22em] text-[#F58220] uppercase">
-                        <span className="h-1 w-10 bg-[#F58220]" />
-                        Performance eyewear
-                    </div>
-                    <h1 className="max-w-[690px] text-[52px] leading-[0.92] font-black tracking-normal text-[#1A1A1A] uppercase sm:text-[72px] lg:text-[86px] xl:text-[96px]">
-                        Built for speed. Designed for clarity.
-                    </h1>
-                    <p className="mt-6 max-w-[560px] text-base leading-7 font-medium text-[#2E2E2E] md:text-lg">
-                        Premium sports sunglasses, moto goggles, and technical
-                        gear engineered for fast days, sharp vision, and total
-                        confidence.
+        <section className="toy-card relative overflow-hidden rounded-[32px] px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+            <div className="pointer-events-none absolute inset-x-10 top-0 h-32 rounded-full bg-[#A9D8F6]/35 blur-3xl" />
+            <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+                <FadeInOnScroll className="relative z-10">
+                    <p className="toy-handwritten text-[2rem] text-[#EF2B2D]">
+                        Playtime starts here
                     </p>
-                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <h1 className="mt-3 max-w-[12ch] text-[2.7rem] leading-[0.98] font-black text-[#061B5B] sm:text-[3.45rem] lg:text-[4.5rem]">
+                        Play, Learn, and Grow Every Day
+                    </h1>
+                    <p className="mt-5 max-w-[32rem] text-base leading-7 font-semibold text-[#26345E] sm:text-lg">
+                        Thoughtfully designed toys that inspire imagination,
+                        creativity, and early learning for every bright little
+                        mind.
+                    </p>
+                    <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                        <Link
+                            href={list.url({ query: { type: 'best_seller' } })}
+                            className="toy-btn-primary rounded-full px-8"
+                        >
+                            Shop Best Sellers
+                        </Link>
                         <Link
                             href={list.url()}
-                            className="inline-flex h-12 items-center justify-center bg-[#F58220] px-8 text-sm font-extrabold tracking-[0.08em] text-white uppercase transition-colors hover:bg-[#E67312]"
+                            className="toy-btn-secondary rounded-full px-8"
                         >
-                            Shop Now
+                            Explore by Age
                         </Link>
-                        <Link
-                            href={`${list.url()}?collection=performance`}
-                            className="inline-flex h-12 items-center justify-center border border-[#1A1A1A] bg-white px-8 text-sm font-extrabold tracking-[0.08em] text-[#1A1A1A] uppercase transition-colors hover:bg-[#1A1A1A] hover:text-white"
-                        >
-                            Explore Collection
-                        </Link>
-                    </div>
-                    <div
-                        className="mt-12 flex items-center gap-3"
-                        aria-hidden="true"
-                    >
-                        <span className="h-1 w-12 bg-[#1A1A1A]" />
-                        <span className="h-1 w-8 bg-[#CFCFCF]" />
-                        <span className="h-1 w-8 bg-[#CFCFCF]" />
                     </div>
                 </FadeInOnScroll>
 
-                <FadeInOnScroll
-                    className="relative min-h-[430px] overflow-hidden lg:min-h-[610px]"
-                    delay={100}
-                >
-                    <img
-                        src={campaignImages.hero}
-                        alt="Cyclist wearing AxeGear performance eyewear"
-                        className="absolute inset-0 h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-transparent" />
-                    <div className="absolute right-5 bottom-8 max-w-[360px] -skew-x-12 bg-[#1A1A1A] px-7 py-5 text-white shadow-[10px_10px_0_#F58220] md:right-10 md:bottom-12">
-                        <p className="skew-x-12 text-2xl leading-none font-black tracking-normal uppercase md:text-3xl">
-                            See it. Feel it. Own it.
-                        </p>
-                    </div>
-                </FadeInOnScroll>
-            </div>
-        </section>
-    );
-}
-
-function CategoryStrip() {
-    return (
-        <section className="border-b border-[#CFCFCF] bg-white">
-            <div className="mx-auto grid max-w-[1600px] grid-cols-2 divide-x divide-y divide-[#E5E5E5] sm:grid-cols-3 lg:grid-cols-5 lg:divide-y-0">
-                {categoryShortcuts.map((item, index) => {
-                    const Icon = item.icon;
-
-                    return (
-                        <FadeInOnScroll key={item.label} delay={index * 45}>
-                            <Link
-                                href={item.href}
-                                className="group flex min-h-[126px] flex-col items-center justify-center gap-3 bg-white px-4 text-center transition-colors hover:bg-[#FFF3E8]"
-                            >
-                                <Icon
-                                    className="h-8 w-8 text-[#1A1A1A] transition-colors group-hover:text-[#F58220]"
-                                    strokeWidth={1.8}
-                                />
-                                <span className="text-sm font-extrabold tracking-[0.08em] text-[#1A1A1A] uppercase">
-                                    {item.label}
-                                </span>
-                            </Link>
-                        </FadeInOnScroll>
-                    );
-                })}
-            </div>
-        </section>
-    );
-}
-
-function ShopBySport() {
-    return (
-        <section className="bg-white px-4 py-12 md:px-8 md:py-16">
-            <div className="mx-auto max-w-[1600px]">
-                <SectionHeader
-                    kicker="Find your lane"
-                    title="Shop by sport"
-                    action="Shop all sports"
-                />
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
-                    {sportCards.map((sport, index) => {
-                        const Icon = sport.icon;
-
-                        return (
-                            <FadeInOnScroll key={sport.name} delay={index * 35}>
-                                <Link
-                                    href={`${list.url()}?sport=${encodeURIComponent(sport.name.toLowerCase())}`}
-                                    className="group relative flex aspect-[1.02] overflow-hidden border border-[#1A1A1A] bg-[#1A1A1A]"
-                                >
-                                    <img
-                                        src={sport.image}
-                                        alt={`${sport.name} sport`}
-                                        className="absolute inset-0 h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-                                    <div className="relative z-10 mt-auto flex w-full items-end justify-between p-4 text-white md:p-5">
-                                        <span className="text-xl font-black tracking-normal uppercase md:text-2xl">
-                                            {sport.name}
-                                        </span>
-                                        <Icon
-                                            className="h-6 w-6 text-[#F58220]"
-                                            strokeWidth={2.1}
-                                        />
-                                    </div>
-                                </Link>
-                            </FadeInOnScroll>
-                        );
-                    })}
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function CampaignBand() {
-    return (
-        <FadeInOnScroll>
-            <section className="grid min-h-[520px] grid-cols-1 overflow-hidden border-y border-[#1A1A1A] bg-[#1A1A1A] lg:grid-cols-[1fr_0.9fr_1fr]">
-                <img
-                    src={campaignImages.goggle}
-                    alt="AxeGear goggle lens detail"
-                    className="h-[320px] w-full object-cover lg:h-full"
-                    loading="lazy"
-                    decoding="async"
-                />
-                <div className="relative flex items-center justify-center bg-white px-5 py-12 lg:-mx-10 lg:skew-x-[-7deg]">
-                    <div className="max-w-[460px] text-center lg:skew-x-[7deg]">
-                        <div className="mb-5 text-3xl font-black tracking-[0.12em] text-[#F58220]">
-                            ///
-                        </div>
-                        <h2 className="text-[40px] leading-[0.95] font-black tracking-normal text-[#1A1A1A] uppercase md:text-[58px]">
-                            Engineered for the fastest moments
-                        </h2>
-                        <p className="mx-auto mt-5 max-w-[390px] text-base leading-7 font-medium text-[#2E2E2E]">
-                            High-contrast lenses, locked-in fit, and
-                            no-wasted-motion details for riders and athletes who
-                            need instant clarity.
-                        </p>
-                        <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-                            <Link
-                                href={`${list.url()}?category=goggles`}
-                                className="inline-flex h-12 items-center justify-center bg-[#F58220] px-7 text-sm font-extrabold tracking-[0.08em] text-white uppercase hover:bg-[#E67312]"
-                            >
-                                Shop Goggles
-                            </Link>
-                            <Link
-                                href={list.url()}
-                                className="inline-flex h-12 items-center justify-center border border-[#1A1A1A] px-7 text-sm font-extrabold tracking-[0.08em] text-[#1A1A1A] uppercase hover:bg-[#1A1A1A] hover:text-white"
-                            >
-                                View Gear
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-                <img
-                    src={campaignImages.moto}
-                    alt="Motorsport athlete wearing performance gear"
-                    className="h-[320px] w-full object-cover lg:h-full"
-                    loading="lazy"
-                    decoding="async"
-                />
-            </section>
-        </FadeInOnScroll>
-    );
-}
-
-function NewArrivals({ products }: { products: ProductCard[] }) {
-    return (
-        <section className="bg-white px-4 py-12 md:px-8 md:py-16">
-            <div className="mx-auto max-w-[1600px]">
-                <SectionHeader
-                    kicker="Latest drop"
-                    title="New arrivals"
-                    action="View all"
-                />
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-4">
-                    {products.map((product, index) => (
-                        <ProductTile
-                            key={`${product.id}-${product.slug}`}
-                            product={product}
-                            index={index}
-                        />
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function FeaturedCollections() {
-    return (
-        <section className="border-y border-[#1A1A1A] bg-[#F8F8F8] px-4 py-12 md:px-8 md:py-16">
-            <div className="mx-auto max-w-[1600px]">
-                <SectionHeader
-                    kicker="Built sets"
-                    title="Featured collections"
-                    action="Explore"
-                />
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                    {featuredCollections.map((item, index) => (
-                        <FadeInOnScroll key={item.title} delay={index * 60}>
-                            <Link
-                                href={`${list.url()}?collection=${encodeURIComponent(item.title.toLowerCase())}`}
-                                className="group relative block aspect-[4/5] overflow-hidden border border-[#1A1A1A] bg-[#1A1A1A]"
-                            >
+                <FadeInOnScroll className="relative" delay={120}>
+                    <div className="relative overflow-hidden rounded-[28px] bg-[linear-gradient(135deg,#FFF8EF_0%,#FFFFFF_48%,#FFF5F8_100%)] p-4 sm:p-6 lg:p-8">
+                        <div className="pointer-events-none absolute top-8 left-6 h-28 w-28 rounded-full bg-[#FFC94A]/20 blur-3xl" />
+                        <div className="pointer-events-none absolute right-8 bottom-10 h-24 w-24 rounded-full bg-[#A9D8F6]/35 blur-3xl" />
+                        <div className="grid gap-4 sm:grid-cols-[0.78fr_1.22fr] sm:items-end">
+                            <div className="rounded-[24px] bg-white/75 p-3 shadow-subtle backdrop-blur-sm">
                                 <img
-                                    src={item.image}
-                                    alt={item.title}
-                                    className="absolute inset-0 h-full w-full object-cover opacity-85 transition-transform duration-700 group-hover:scale-105"
-                                    loading="lazy"
-                                    decoding="async"
+                                    src={toyPhotography.hero}
+                                    alt="Child playing with colorful educational toys"
+                                    className="aspect-[0.9] w-full rounded-[18px] object-cover object-center"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                                <div className="absolute inset-x-0 bottom-0 p-5">
-                                    <p className="mb-3 text-[12px] font-extrabold tracking-[0.18em] text-[#F58220] uppercase">
-                                        Collection
-                                    </p>
-                                    <h3 className="text-3xl leading-none font-black tracking-normal text-white uppercase">
-                                        {item.title}
-                                    </h3>
+                            </div>
+                            <div className="grid gap-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <ToyShowcaseCard
+                                        image="https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?q=80&w=900&auto=format&fit=crop"
+                                        title="ABC Blocks"
+                                    />
+                                    <ToyShowcaseCard
+                                        image="https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=900&auto=format&fit=crop"
+                                        title="Shape Puzzle"
+                                    />
                                 </div>
-                            </Link>
-                        </FadeInOnScroll>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function BenefitStrip() {
-    return (
-        <section className="bg-white">
-            <div className="mx-auto grid max-w-[1600px] grid-cols-1 divide-y divide-[#E5E5E5] border-x border-[#E5E5E5] md:grid-cols-4 md:divide-x md:divide-y-0">
-                {benefits.map((benefit) => {
-                    const Icon = benefit.icon;
-
-                    return (
-                        <div
-                            key={benefit.title}
-                            className="flex min-h-[150px] items-start gap-4 px-5 py-7"
-                        >
-                            <Icon
-                                className="mt-1 h-8 w-8 shrink-0 text-[#F58220]"
-                                strokeWidth={1.9}
-                            />
-                            <div>
-                                <h3 className="text-base font-black tracking-[0.04em] text-[#1A1A1A] uppercase">
-                                    {benefit.title}
-                                </h3>
-                                <p className="mt-2 text-sm leading-6 font-medium text-[#707070]">
-                                    {benefit.body}
-                                </p>
+                                <div className="rounded-[24px] bg-white px-5 py-4 shadow-subtle">
+                                    <div className="grid gap-4 sm:grid-cols-[1.1fr_0.9fr] sm:items-center">
+                                        <img
+                                            src="https://images.unsplash.com/photo-1563901935883-cb291c7af1de?q=80&w=900&auto=format&fit=crop"
+                                            alt="Smiling strawberry-themed toy"
+                                            className="aspect-[1.25] w-full rounded-[20px] object-cover"
+                                        />
+                                        <div>
+                                            <p className="toy-handwritten text-[1.8rem] text-[#061B5B]">
+                                                Bright picks
+                                            </p>
+                                            <p className="mt-2 text-sm leading-6 font-semibold text-[#26345E]">
+                                                Stack, sort, imagine, and learn
+                                                with friendly favorites ready
+                                                for gifting.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    );
-                })}
+                    </div>
+                </FadeInOnScroll>
             </div>
         </section>
     );
 }
 
-function ProductTile({
+function ToyShowcaseCard({ image, title }: { image: string; title: string }) {
+    return (
+        <div className="rounded-[22px] bg-white p-3 shadow-subtle">
+            <img
+                src={image}
+                alt={title}
+                className="aspect-[1.1] w-full rounded-[16px] object-cover"
+            />
+            <p className="mt-3 text-sm font-black text-[#061B5B]">{title}</p>
+        </div>
+    );
+}
+
+function CategoryFeatureRow({ cards }: { cards: CategoryFeature[] }) {
+    return (
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+            {cards.map((card, index) => (
+                <FadeInOnScroll
+                    key={`${card.title}-${index}`}
+                    delay={index * 40}
+                >
+                    <Link
+                        href={card.href}
+                        className="toy-card group flex h-full flex-col overflow-hidden p-3 transition-transform hover:-translate-y-1"
+                    >
+                        <img
+                            src={card.image}
+                            alt={card.title}
+                            className="aspect-[1.25] w-full rounded-[18px] object-cover"
+                        />
+                        <div className="flex flex-1 flex-col px-1 pt-4 pb-1">
+                            <h2 className="text-[1.15rem] leading-tight font-black text-[#061B5B]">
+                                {card.title}
+                            </h2>
+                            <p className="mt-2 flex-1 text-sm leading-6 font-semibold text-[#26345E]">
+                                {card.description}
+                            </p>
+                            <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#061B5B] group-hover:text-[#1F7AE5]">
+                                Shop Now
+                                <ArrowRight size={16} strokeWidth={2.5} />
+                            </span>
+                        </div>
+                    </Link>
+                </FadeInOnScroll>
+            ))}
+        </section>
+    );
+}
+
+function AgeExplorer() {
+    return (
+        <section className="mt-12">
+            <SectionHeader
+                title="Shop by Age"
+                action="View All"
+                href={list.url()}
+            />
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                {ageCards.map((card, index) => (
+                    <FadeInOnScroll key={card.title} delay={index * 40}>
+                        <Link
+                            href={list.url()}
+                            className={`block overflow-hidden rounded-[28px] bg-gradient-to-br ${card.tint} p-5 shadow-subtle`}
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                <h3 className="max-w-[8ch] text-[2rem] leading-[1.05] font-black text-[#061B5B]">
+                                    {card.title}
+                                </h3>
+                                <span className="text-2xl text-white/85">
+                                    ☆
+                                </span>
+                            </div>
+                            <div className="mt-5 flex items-end justify-between gap-4">
+                                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#061B5B] shadow-subtle">
+                                    <ArrowRight size={18} strokeWidth={2.3} />
+                                </span>
+                                <img
+                                    src={card.image}
+                                    alt={card.title}
+                                    className="h-32 w-32 rounded-full object-cover object-center shadow-subtle"
+                                />
+                            </div>
+                        </Link>
+                    </FadeInOnScroll>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function BestSellersSection({ products }: { products: ProductCard[] }) {
+    return (
+        <section className="mt-14">
+            <SectionHeader
+                title="Best Sellers"
+                action="View All"
+                href={list.url({ query: { type: 'best_seller' } })}
+                centered
+            />
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                {products.map((product, index) => (
+                    <FadeInOnScroll
+                        key={`${product.id}-${product.slug}`}
+                        delay={index * 45}
+                    >
+                        <HomepageProductCard product={product} index={index} />
+                    </FadeInOnScroll>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function HomepageProductCard({
     product,
     index,
 }: {
     product: ProductCard;
     index: number;
 }) {
-    const hasSale = product.sale_price !== null;
+    const href = detail.url({ query: { product: product.slug } });
+    const rating = ratingForProduct(product);
 
     return (
-        <FadeInOnScroll delay={index * 45}>
-            <Link
-                href={detail.url({ query: { product: product.slug } })}
-                className="group block overflow-hidden border border-[#E5E5E5] bg-white transition-colors hover:border-[#1A1A1A]"
-            >
-                <div className="relative aspect-square bg-[#F8F8F8] p-4">
-                    {(hasSale || product.label) && (
-                        <span className="absolute top-3 right-3 z-10 bg-[#F58220] px-2.5 py-1.5 text-[11px] font-black tracking-[0.08em] text-white uppercase">
-                            {hasSale ? 'Sale' : product.label}
-                        </span>
-                    )}
+        <article className="toy-card group overflow-hidden p-4 pb-5 sm:p-5">
+            <Link href={href} className="block">
+                <div className="relative aspect-[0.95] overflow-hidden rounded-[18px] bg-white p-5">
                     <img
                         src={productImage(product, index)}
                         alt={product.name}
-                        className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
                         decoding="async"
+                        className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.035]"
                     />
-                </div>
-                <div className="border-t border-[#E5E5E5] p-4">
-                    <p className="mb-2 min-h-[40px] text-sm leading-5 font-black tracking-normal text-[#1A1A1A] uppercase">
-                        {product.name}
-                    </p>
-                    <p className="mb-3 text-xs font-bold tracking-[0.08em] text-[#707070] uppercase">
-                        {product.category ??
-                            product.collection ??
-                            'AxeGear Performance'}
-                    </p>
-                    <div className="mb-4 flex flex-wrap items-center gap-2 text-sm font-black">
-                        <span
-                            className={
-                                hasSale ? 'text-[#F58220]' : 'text-[#1A1A1A]'
-                            }
-                        >
-                            {formatPrice(product.sale_price ?? product.price)}
-                        </span>
-                        {hasSale && (
-                            <span className="text-[#9A9A9A] line-through">
-                                {formatPrice(product.price)}
-                            </span>
-                        )}
-                    </div>
-                    <span className="flex h-10 items-center justify-center bg-[#1A1A1A] text-xs font-black tracking-[0.08em] text-white uppercase transition-colors group-hover:bg-[#F58220]">
-                        Quick Add
+                    <span className="toy-handwritten absolute top-3 right-4 text-[1.75rem] text-[#061B5B]">
+                        {badgeLabel(product)}
                     </span>
                 </div>
             </Link>
+            <div className="mt-4 flex min-h-[220px] flex-col">
+                <Link href={href} className="block">
+                    <h3 className="text-[1.55rem] leading-[1.08] font-black text-[#061B5B]">
+                        {product.name}
+                    </h3>
+                </Link>
+                <div className="mt-3 flex items-center gap-2 text-sm font-bold text-[#061B5B]">
+                    <span className="flex items-center gap-0.5 text-[#FF8A00]">
+                        {Array.from({ length: 5 }).map((_, starIndex) => (
+                            <Star
+                                key={starIndex}
+                                size={16}
+                                fill="currentColor"
+                                strokeWidth={0}
+                            />
+                        ))}
+                    </span>
+                    <span>{rating.score}</span>
+                    <span>({rating.reviews})</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold text-[#26345E]">
+                    {product.collection ??
+                        product.category ??
+                        'Playtime favorite'}
+                </p>
+                <p className="mt-3 text-[1.85rem] leading-none font-black text-[#061B5B]">
+                    {formatPrice(product.sale_price ?? product.price)}
+                </p>
+                <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
+                    <Link href={href} className="toy-btn-secondary">
+                        More Info
+                    </Link>
+                    <Link href={href} className="toy-btn-primary">
+                        Add to Cart
+                    </Link>
+                </div>
+            </div>
+        </article>
+    );
+}
+
+function MeaningfulPlaySection() {
+    return (
+        <section className="mt-14 grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+            <FadeInOnScroll className="pt-2">
+                <p className="toy-handwritten text-[1.85rem] text-[#EF2B2D]">
+                    Play with purpose
+                </p>
+                <h2 className="mt-3 max-w-[11ch] text-[2.7rem] leading-[1.02] font-black text-[#061B5B] sm:text-[3.25rem]">
+                    Made for Meaningful Play
+                </h2>
+                <p className="mt-5 max-w-[34rem] text-base leading-7 font-semibold text-[#26345E]">
+                    We believe play is how children learn best. Our toys are
+                    crafted to spark curiosity, build skills, and create joyful
+                    moments that last a lifetime.
+                </p>
+            </FadeInOnScroll>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-5">
+                {playFeatures.map((feature, index) => {
+                    const Icon = feature.icon;
+
+                    return (
+                        <FadeInOnScroll key={feature.title} delay={index * 45}>
+                            <div className="toy-card h-full px-5 py-6 text-center">
+                                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#EEF7FF] text-[#061B5B] shadow-subtle">
+                                    <Icon size={28} strokeWidth={2} />
+                                </div>
+                                <h3 className="mt-4 text-[1.1rem] font-black text-[#061B5B]">
+                                    {feature.title}
+                                </h3>
+                                <p className="mt-3 text-sm leading-6 font-semibold text-[#26345E]">
+                                    {feature.body}
+                                </p>
+                            </div>
+                        </FadeInOnScroll>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
+function NewArrivalsPromo() {
+    return (
+        <FadeInOnScroll className="mt-14">
+            <section className="overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,#FFF9EF_0%,#FFFFFF_55%,#F3FAFF_100%)] p-6 shadow-subtle sm:p-8 lg:p-10">
+                <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+                    <img
+                        src={toyPhotography.promo}
+                        alt="Wooden animal toys lined up on a play table"
+                        className="w-full rounded-[26px] object-cover lg:min-h-[320px]"
+                    />
+                    <div>
+                        <p className="toy-handwritten text-[2rem] text-[#EF2B2D]">
+                            New!
+                        </p>
+                        <h2 className="mt-2 max-w-[12ch] text-[2.5rem] leading-[1.02] font-black text-[#061B5B] sm:text-[3.25rem]">
+                            New Arrivals for Curious Little Minds
+                        </h2>
+                        <p className="mt-4 max-w-[30rem] text-base leading-7 font-semibold text-[#26345E]">
+                            Fresh, fun, and educational toys that spark wonder
+                            and inspire bright everyday adventures at home.
+                        </p>
+                        <Link
+                            href={list.url({ query: { type: 'new_arrival' } })}
+                            className="toy-btn-primary mt-7 rounded-full px-8"
+                        >
+                            Shop Now
+                        </Link>
+                    </div>
+                </div>
+            </section>
+        </FadeInOnScroll>
+    );
+}
+
+function GiftGuideSection() {
+    return (
+        <section className="mt-14">
+            <SectionHeader
+                title="Find the Perfect Gift"
+                action="View All"
+                href={list.url()}
+                centered
+            />
+            <div className="grid gap-5 lg:grid-cols-3">
+                {giftCards.map((card, index) => (
+                    <FadeInOnScroll key={card.title} delay={index * 45}>
+                        <Link
+                            href={card.href}
+                            className="toy-card group block overflow-hidden p-3"
+                        >
+                            <img
+                                src={card.image}
+                                alt={card.title}
+                                className="aspect-[1.45] w-full rounded-[20px] object-cover"
+                            />
+                            <div className="flex items-end justify-between gap-4 px-2 pt-5 pb-2">
+                                <div>
+                                    <h3 className="text-[1.4rem] leading-tight font-black text-[#061B5B]">
+                                        {card.title}
+                                    </h3>
+                                    <p className="mt-2 text-sm leading-6 font-semibold text-[#26345E]">
+                                        {card.body}
+                                    </p>
+                                </div>
+                                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#061B5B] text-[#061B5B] group-hover:border-[#1F7AE5] group-hover:text-[#1F7AE5]">
+                                    <ArrowRight size={18} strokeWidth={2.4} />
+                                </span>
+                            </div>
+                        </Link>
+                    </FadeInOnScroll>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function TestimonialsSection() {
+    return (
+        <section className="mt-14">
+            <SectionHeader
+                title="Loved by Parents, Cherished by Kids"
+                action="Read More"
+                href={list.url()}
+                centered
+            />
+            <div className="grid gap-4 lg:grid-cols-3">
+                {testimonials.map((testimonial, index) => (
+                    <FadeInOnScroll key={testimonial.name} delay={index * 45}>
+                        <article className="toy-card flex h-full gap-4 p-5">
+                            <img
+                                src={`https://i.pravatar.cc/120?img=${index + 12}`}
+                                alt={testimonial.name}
+                                className="h-16 w-16 shrink-0 rounded-full object-cover"
+                            />
+                            <div>
+                                <p className="text-sm leading-7 font-semibold text-[#26345E]">
+                                    “{testimonial.quote}”
+                                </p>
+                                <div className="mt-4 flex items-center gap-3">
+                                    <span className="flex items-center gap-0.5 text-[#FF8A00]">
+                                        {Array.from({ length: 5 }).map(
+                                            (_, starIndex) => (
+                                                <Star
+                                                    key={starIndex}
+                                                    size={15}
+                                                    fill="currentColor"
+                                                    strokeWidth={0}
+                                                />
+                                            ),
+                                        )}
+                                    </span>
+                                    <span className="text-sm font-black text-[#061B5B]">
+                                        — {testimonial.name}
+                                    </span>
+                                </div>
+                            </div>
+                        </article>
+                    </FadeInOnScroll>
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function PlaytimeNewsletter() {
+    return (
+        <FadeInOnScroll className="mt-14">
+            <section className="overflow-hidden rounded-[32px] bg-[#EAF6FF] px-6 py-8 shadow-subtle sm:px-8 lg:px-10">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <p className="toy-handwritten text-[2rem] text-[#061B5B]">
+                            Let’s Make Playtime More Joyful
+                        </p>
+                        <p className="mt-2 max-w-[42rem] text-base leading-7 font-semibold text-[#26345E]">
+                            Join our family for special offers, new arrivals,
+                            and playful inspiration picked for curious little
+                            minds.
+                        </p>
+                    </div>
+                    <form
+                        className="flex w-full max-w-[520px] flex-col gap-3 sm:flex-row"
+                        onSubmit={(event) => event.preventDefault()}
+                    >
+                        <label
+                            htmlFor="homepage-newsletter"
+                            className="sr-only"
+                        >
+                            Email address
+                        </label>
+                        <input
+                            id="homepage-newsletter"
+                            type="email"
+                            placeholder="Enter your email address"
+                            className="h-13 flex-1 rounded-full border border-hairline-strong bg-white px-5 text-base font-semibold text-[#061B5B] placeholder:text-[#6F7691] focus:outline-none"
+                        />
+                        <button
+                            type="submit"
+                            className="toy-btn-primary rounded-full px-8"
+                        >
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+            </section>
         </FadeInOnScroll>
     );
 }
 
 function SectionHeader({
-    kicker,
     title,
     action,
+    href,
+    centered = false,
 }: {
-    kicker: string;
     title: string;
     action: string;
+    href: string;
+    centered?: boolean;
 }) {
     return (
-        <div className="mb-7 flex flex-col gap-4 md:mb-9 md:flex-row md:items-end md:justify-between">
-            <div>
-                <p className="mb-2 text-[12px] font-extrabold tracking-[0.18em] text-[#F58220] uppercase">
-                    {kicker}
-                </p>
-                <h2 className="text-[34px] leading-none font-black tracking-normal text-[#1A1A1A] uppercase md:text-[48px]">
+        <div
+            className={`mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end ${centered ? 'sm:justify-between' : 'sm:justify-between'}`}
+        >
+            <div className={centered ? 'sm:mx-auto sm:text-center' : ''}>
+                <h2 className="text-[2.35rem] leading-[1.03] font-black text-[#061B5B] sm:text-[3rem]">
                     {title}
                 </h2>
             </div>
             <Link
-                href={list.url()}
-                className="inline-flex w-fit items-center gap-2 text-sm font-extrabold tracking-[0.08em] text-[#1A1A1A] uppercase transition-colors hover:text-[#F58220]"
+                href={href}
+                className="inline-flex items-center gap-2 text-sm font-black text-[#061B5B] hover:text-[#1F7AE5] sm:self-center"
             >
                 {action}
-                <ChevronRight size={18} strokeWidth={2.4} />
+                <ChevronRight size={18} strokeWidth={2.5} />
             </Link>
         </div>
     );
